@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>D5 · Permanent Corrective Actions – E8D Portal</title>
+<link rel="stylesheet" href="assets/portal.css">
+</head>
+<body data-stage="D5">
+<div id="stage-content">
+  <div class="dev-page">
+    <b>D5 – Permanent Corrective Actions.</b> Next Stage leads to the D5A approval gate.
+    <ul>
+      <li>Starts with one corrective action; “+ Add corrective action” adds more. Each has its own Hypothesis, Risk and Problem source.</li>
+      <li>Every corrective action added here appears automatically in D6 for verification.</li>
+      <li>Suggested child list <code>E8D_CorrectiveActions</code>: 8D ID, CA No, Corrective Action, Hypothesis, Risk, Problem Source, Validation Steps (D6).</li>
+      <li>“Systemic action needed?” controls D7 / D7A: only <b>Yes</b> makes them active; otherwise they are greyed out and skipped.</li>
+    </ul>
+  </div>
+
+  <h2 class="section-h">Corrective Actions (validated but not verified)</h2>
+  <div data-list="d5_ca" data-min="1" data-add-label="Add corrective action" data-item="corrective action" data-item-class="card-item">
+    <template>
+      <p class="item-title">Corrective Action {n}</p>
+      <div data-f="textarea" data-autogrow data-key="d5_ca_{n}" data-label="Corrective Action" data-ph="Describe corrective action {n}"></div>
+      <div class="g2">
+        <div data-f="textarea" data-autogrow data-key="d5_ca_{n}_hyp" data-label="Hypothesis" data-ph="Hypothesis this action addresses"></div>
+        <div data-f="textarea" data-autogrow data-key="d5_ca_{n}_risk" data-label="Risk" data-ph="Risk of this action"></div>
+      </div>
+      <div data-f="dropdown" data-key="d5_ca_{n}_source" data-label="Problem source" data-options="Design|Manufacturing|Sourcing|Process"></div>
+    </template>
+  </div>
+
+  <div data-f="dropdown" data-key="d5_happened_before" data-label="Did the failure happen in the past?" data-options="Yes|No"></div>
+  <div data-f="dropdown" data-key="d5_systemic_needed" data-label="Systemic action needed?" data-options="Yes|No" data-note="Yes → D7 &amp; D7A active. No / not answered → D7 &amp; D7A greyed out and skipped."></div>
+</div>
+<script src="assets/portal.js"></script>
+</body>
+</html>

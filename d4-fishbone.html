@@ -1,0 +1,356 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>D4 · Interactive Fish Bone – E8D Portal</title>
+<link rel="stylesheet" href="assets/portal.css">
+<style>
+  /* Fishbone page styles – kept here so the shared stylesheet stays untouched */
+  .fish-tools { display: flex; justify-content: flex-end; gap: 8px; margin: 0 0 10px; }
+  .fish-tools button {
+    padding: 5px 12px; cursor: pointer; font: inherit; font-size: 12.5px; font-weight: 600; color: var(--hdr);
+    background: #fff; border: 1px solid var(--panel-line); border-radius: 999px;
+  }
+  .fish-tools button:hover { border-color: var(--hdr); background: #e8f2f6; }
+  .fish-tools button:focus-visible { outline: 3px solid rgba(21,94,126,.3); outline-offset: 2px; }
+
+  .fish { position: relative; padding-right: 166px; }
+  .fish-lines { position: absolute; left: 0; top: 0; width: 100%; height: 100%; overflow: visible; pointer-events: none; z-index: 0; }
+  .fish-lines .spine-line { stroke: var(--hdr); stroke-width: 5; stroke-linecap: round; }
+  .fish-lines .tail { fill: var(--hdr); }
+  .fish-lines .bone-line { stroke: var(--hdr); stroke-width: 3; stroke-linecap: round; }
+  .fish-lines .rib { stroke: #7d97a5; stroke-width: 1.5; }
+  .fish-lines .rib.add { stroke-dasharray: 4 4; }
+
+  .half { position: relative; z-index: 1; display: grid; grid-auto-flow: column; grid-auto-columns: minmax(0, 1fr); min-height: 170px; }
+  .bone { display: flex; flex-direction: column; gap: 10px; padding: 0 4px; }
+  .bone-label {
+    align-self: flex-start; display: inline-flex; align-items: center; gap: 6px;
+    padding: 6px 12px; border-radius: 999px; white-space: nowrap;
+    background: var(--hdr); color: #fff; font-weight: 700; font-size: 13px;
+  }
+  .bone-label span { background: rgba(255,255,255,.22); border-radius: 999px; padding: 0 7px; font-size: 11px; }
+  .top .bone-label { margin-bottom: 4px; }
+  .bottom .bone-label { order: 99; margin-top: auto; }
+  .spine { height: 48px; }
+
+  .rib-row { position: relative; width: calc(80% - 34px); }
+  .rib-row.add-row { width: max-content; }
+  .fish textarea.ctl { min-height: 0; resize: none; overflow: hidden; line-height: 1.35; }
+  .hyp-title { min-height: 34px; padding: 6px 8px; background: #fff; font-weight: 600; }
+  .hyp-detail { margin-top: 4px; padding: 2px 8px 8px; background: #f6f9fb; border: 1px solid #e3e8ec; border-radius: 6px; }
+  .det { min-height: 30px; margin-top: 6px; padding: 5px 8px; font-size: 13px; }
+  .det.act-title { font-weight: 600; }
+  .act + .act { margin-top: 10px; padding-top: 4px; border-top: 1px dashed #d3dce2; }
+  .results { margin-left: 10px; padding-left: 8px; border-left: 2px solid #cfdbe2; }
+  .mini-actions { display: flex; flex-wrap: wrap; gap: 2px 10px; margin-top: 5px; }
+  .mini-actions button {
+    padding: 0; cursor: pointer; font: inherit; font-size: 12px; font-weight: 600;
+    color: var(--hdr); background: none; border: 0;
+  }
+  .mini-actions button:hover { text-decoration: underline; }
+  .mini-actions button.rm { font-weight: 400; color: var(--muted); text-decoration: underline; }
+  .mini-actions button.rm:hover { color: var(--accent); }
+  .mini-actions button:focus-visible { outline: 3px solid rgba(21,94,126,.3); outline-offset: 2px; }
+  .hyp-toggle {
+    position: absolute; z-index: 2; width: 22px; height: 22px; padding: 0; cursor: pointer;
+    border: 1.5px solid var(--hdr); border-radius: 50%; background: #fff; color: var(--hdr);
+    font: 700 15px/1 "Segoe UI", system-ui, sans-serif;
+  }
+  .hyp.open .hyp-toggle { background: var(--hdr); color: #fff; }
+  .hyp-toggle:focus-visible, .add-hyp:focus-visible, .hyp-sum:focus-visible { outline: 3px solid rgba(21,94,126,.3); outline-offset: 2px; }
+  .hyp-sum {
+    display: block; padding: 3px 0 0; cursor: pointer; text-align: left;
+    font: inherit; font-size: 12px; color: var(--muted); background: none; border: 0;
+  }
+  .hyp-sum:hover { color: var(--hdr); text-decoration: underline; }
+  .hyp-remove {
+    display: block; margin: 6px 0 0 auto; padding: 0; cursor: pointer;
+    font: inherit; font-size: 12px; color: var(--muted); background: none; border: 0; text-decoration: underline;
+  }
+  .hyp-remove:hover { color: var(--accent); }
+  .add-hyp {
+    padding: 4px 12px; cursor: pointer; font: inherit; font-size: 12.5px; font-weight: 600; color: var(--hdr);
+    background: #fff; border: 1.5px dashed var(--line); border-radius: 999px;
+  }
+  .add-hyp:hover { border-color: var(--hdr); background: #e8f2f6; }
+
+  .fish-head {
+    position: absolute; right: 0; top: 40%; z-index: 1; width: 150px; min-height: 96px;
+    padding: 14px 22px 14px 18px; border-radius: 14px 60px 60px 14px;
+    background: var(--hdr); color: #fff;
+  }
+  .fish-head small { font-size: 10.5px; font-weight: 700; letter-spacing: .05em; text-transform: uppercase; opacity: .8; }
+  .fish-head p {
+    margin: 4px 0 0; font-size: 13px; overflow: hidden;
+    display: -webkit-box; -webkit-line-clamp: 6; -webkit-box-orient: vertical;
+  }
+  .fish-head p.empty { font-style: italic; opacity: .75; }
+
+  /* Narrow screens: no diagram, bones become stacked cards */
+  .fish.stacked { display: flex; flex-direction: column; gap: 14px; padding-right: 0; }
+  .fish.stacked .fish-head { position: static; order: -1; width: auto; min-height: 0; border-radius: 12px; }
+  .fish.stacked .half { grid-auto-flow: row; grid-template-columns: minmax(0, 1fr); gap: 14px; min-height: 0; }
+  .fish.stacked .spine { display: none; }
+  .fish.stacked .bone { padding: 12px; border: 1px solid #e3e8ec; border-radius: 8px; background: #f8fafb; }
+  .fish.stacked .bottom .bone-label { order: 0; margin-top: 0; }
+  .fish.stacked .rib-row { width: auto; margin-left: 0 !important; padding-right: 30px; }
+  .fish.stacked .rib-row.add-row { width: max-content; }
+  .fish.stacked .hyp-toggle { left: auto !important; right: 0; top: 6px !important; }
+</style>
+</head>
+<body data-stage="D4" data-sub="0">
+<div id="stage-content">
+  <div class="dev-page">
+    <b>Interactive Fish Bone.</b>
+    <ul>
+      <li>Seven bones: Design, Man, Machine, Material (top) / Method, Measurement, Mother Nature (bottom). Design is added to the classic 6M because these are engineering-development failures; it lines up with D5 “Problem source = Design” and the DFMEA questions in D2 / D4. Each bone starts with Hypothesis 1 and grows as hypotheses are added.</li>
+      <li>Each hypothesis has a rib with a +/− button that opens or collapses its actions card. On a new 8D each bone shows Hypothesis 1 with its card open; added hypotheses open automatically; all others start collapsed and show “x actions · y results filled”.</li>
+      <li>“Expand all” / “Collapse all” open or close every actions card at once.</li>
+      <li>Card starts with Action 1 + Result 1. “+ Add action” adds a new action with one result; “+ Add result” adds more results under that action. Only the last action / result can be removed.</li>
+      <li>Data model: hypothesis → actions → results, e.g. child lists <code>E8D_FishboneAction</code> (hypothesis ID, Action No, Action) and <code>E8D_FishboneResult</code> (action ID, Result No, Result), or one table with Action No + Result No.</li>
+      <li>Fish head shows the D2 Problem Statement (read-only).</li>
+      <li>Same data as the form layout (<code>E8D_Fishbone</code>: one row per hypothesis), so both views can coexist.</li>
+      <li>Power Apps: easiest as a fixed fishbone background with a vertical gallery per bone; a fully drawn, growing diagram needs an SVG built in formulas (advanced).</li>
+      <li>Below ~760px wide the diagram switches to stacked cards.</li>
+    </ul>
+  </div>
+  <div class="fish-tools">
+    <button type="button" id="fb-expand">Expand all</button>
+    <button type="button" id="fb-collapse">Collapse all</button>
+  </div>
+  <div class="fish" id="fish">
+    <svg class="fish-lines" aria-hidden="true"></svg>
+    <div class="half top" id="half-top"></div>
+    <div class="spine"></div>
+    <div class="half bottom" id="half-bottom"></div>
+    <div class="fish-head" id="fish-head"><small title="From D2 Problem Statement">Problem</small><p id="head-text"></p></div>
+  </div>
+</div>
+<script src="assets/portal.js"></script>
+<script>
+(function () {
+  'use strict';
+  var STORE_KEY = 'e8d-prototype-v1';
+  var S = E8D.state(), V = S.values;           // shared live state object from portal.js
+  function save() { try { localStorage.setItem(STORE_KEY, JSON.stringify(S)); } catch (e) { /* ignore */ } }
+
+  var CATS = [
+    ['design', 'Design', 'top'], ['man', 'Man', 'top'], ['machine', 'Machine', 'top'], ['material', 'Material', 'top'],
+    ['method', 'Method', 'bottom'], ['measurement', 'Measurement', 'bottom'], ['environment', 'Mother Nature (Environment)', 'bottom']
+  ];
+  var X0 = 0.80, X1 = 0.99, GAP = 34;           // bone runs from 80% of its column (outer end) to 99% (spine)
+
+  var fish = document.getElementById('fish');
+  var svg = fish.querySelector('svg');
+  var open = {}, focusKey = null;
+
+  function esc(s) { return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
+  function countKey(cat) { return 'd4_fb_' + cat + '_count'; }
+  function count(cat) { return Math.max(1, +(V[countKey(cat)] || 0)); }
+  function has(key) { return !!(V[key] || '').trim(); }
+  function ta(key, ph, cls, aria) {
+    return '<textarea class="ctl ' + cls + '" rows="1" data-fk="' + key + '" placeholder="' + esc(ph) + '" aria-label="' + esc(aria || ph) + '">' + esc(V[key] || '') + '</textarea>';
+  }
+
+  // Actions and results of hypothesis k. Keys stay compatible with the option 1 layout:
+  // Action i = k_a{i}; its first result = k_r{i}; extra results = k_a{i}_r{j} (j >= 2).
+  function actKey(k, i) { return k + '_a' + i; }
+  function resKey(k, i, j) { return j === 1 ? k + '_r' + i : k + '_a' + i + '_r' + j; }
+  function actCount(k) {
+    var n = +(V[k + '_acount'] || 0);
+    if (has(k + '_a2') || has(k + '_r2')) n = Math.max(n, 2);   // data typed on the option 1 page
+    return Math.max(1, n);
+  }
+  function resCount(k, i) { return Math.max(1, +(V[k + '_a' + i + '_rcount'] || 0)); }
+  function tally(k) {
+    var a = 0, r = 0, na = actCount(k);
+    for (var i = 1; i <= na; i++) {
+      if (has(actKey(k, i))) a++;
+      for (var j = 1, nr = resCount(k, i); j <= nr; j++) if (has(resKey(k, i, j))) r++;
+    }
+    return { a: a, r: r };
+  }
+  function plural(n, w) { return n + ' ' + w + (n === 1 ? '' : 's'); }
+
+  function detailHTML(k) {
+    var na = actCount(k), html = '';
+    for (var i = 1; i <= na; i++) {
+      var nr = resCount(k, i), res = '';
+      for (var j = 1; j <= nr; j++) res += ta(resKey(k, i, j), 'Result ' + j, 'det', 'Action ' + i + ', result ' + j);
+      res += '<div class="mini-actions"><button type="button" data-add-res="' + i + '">+ Add result</button>' +
+        (nr > 1 ? '<button type="button" class="rm" data-rm-res="' + i + '">Remove result ' + nr + '</button>' : '') + '</div>';
+      html += '<div class="act">' + ta(actKey(k, i), 'Action ' + i, 'det act-title') + '<div class="results">' + res + '</div></div>';
+    }
+    return html + '<div class="mini-actions"><button type="button" data-add-act>+ Add action</button>' +
+      (na > 1 ? '<button type="button" class="rm" data-rm-act>Remove action ' + na + '</button>' : '') + '</div>';
+  }
+
+  function boneHTML(c) {
+    var n = count(c[0]), rows = '';
+    for (var i = 1; i <= n; i++) {
+      var k = 'd4_fb_' + c[0] + '_h' + i;
+      // On load only a bone's single, still-empty Hypothesis 1 starts open (to show what to fill);
+      // newly added hypotheses open via the Add button; everything else starts collapsed.
+      var t = tally(k);
+      if (!(k in open)) open[k] = n === 1 && t.a + t.r === 0;
+      var isOpen = open[k];
+      rows += '<div class="rib-row hyp' + (isOpen ? ' open' : '') + '" data-k="' + k + '">' +
+        ta(k, 'Hypothesis ' + i, 'hyp-title') +
+        '<button type="button" class="hyp-toggle" data-toggle aria-expanded="' + isOpen + '" ' +
+          'aria-label="' + (isOpen ? 'Collapse' : 'Expand') + ' actions and results for hypothesis ' + i + '">' + (isOpen ? '−' : '+') + '</button>' +
+        (isOpen
+          ? '<div class="hyp-detail">' + detailHTML(k) +
+              (i === n && n > 1 ? '<button type="button" class="hyp-remove" data-remove>Remove hypothesis ' + i + '</button>' : '') + '</div>'
+          : '<button type="button" class="hyp-sum" data-toggle>' + plural(t.a, 'action') + ' · ' + plural(t.r, 'result') + ' filled</button>') +
+      '</div>';
+    }
+    return '<div class="bone" data-cat="' + c[0] + '">' +
+      '<div class="bone-label">' + esc(c[1]) + ' <span title="Hypotheses">' + n + '</span></div>' + rows +
+      '<div class="rib-row add-row"><button type="button" class="add-hyp" data-add>+ Add hypothesis</button></div></div>';
+  }
+
+  function grow(el) { el.style.height = 'auto'; el.style.height = (el.scrollHeight + 2) + 'px'; }
+
+  function render() {
+    document.getElementById('half-top').innerHTML = CATS.filter(function (c) { return c[2] === 'top'; }).map(boneHTML).join('');
+    document.getElementById('half-bottom').innerHTML = CATS.filter(function (c) { return c[2] === 'bottom'; }).map(boneHTML).join('');
+    var head = document.getElementById('head-text'), ps = (V.d2_problem_statement || '').trim();
+    head.textContent = ps || 'Problem statement from D2 appears here';
+    head.classList.toggle('empty', !ps);
+    fish.querySelectorAll('textarea').forEach(grow);
+    layout();
+    if (focusKey) {
+      var f = fish.querySelector('[data-fk="' + focusKey + '"]');
+      if (f) f.focus();
+      focusKey = null;
+    }
+  }
+
+  // ---- Geometry: place each hypothesis along its slanted bone and draw the lines ----
+  function layout() {
+    var stacked = fish.clientWidth < 760;
+    fish.classList.toggle('stacked', stacked);
+    if (stacked) {
+      svg.innerHTML = '';
+      fish.querySelectorAll('.rib-row, .bone-label').forEach(function (e) { e.style.marginLeft = ''; });
+      return;
+    }
+    var fr = fish.getBoundingClientRect();
+    function R(el) {
+      var r = el.getBoundingClientRect();
+      return { l: r.left - fr.left, t: r.top - fr.top, r: r.right - fr.left, b: r.bottom - fr.top, w: r.width, h: r.height };
+    }
+    var sp = R(fish.querySelector('.spine')), spineY = sp.t + sp.h / 2;
+    var headEl = document.getElementById('fish-head');
+    headEl.style.top = (spineY - headEl.offsetHeight / 2) + 'px';
+    var hr = R(headEl);
+
+    var out = '<polygon class="tail" points="' + sp.l + ',' + (spineY - 18) + ' ' + (sp.l + 24) + ',' + spineY + ' ' + sp.l + ',' + (spineY + 18) + '"/>' +
+      '<line class="spine-line" x1="' + (sp.l + 20) + '" y1="' + spineY + '" x2="' + (hr.l + 4) + '" y2="' + spineY + '"/>';
+
+    fish.querySelectorAll('.bone').forEach(function (b) {
+      var isTop = !!b.closest('.top');
+      var br = R(b), W = br.w;
+      var lab = b.querySelector('.bone-label');
+      lab.style.marginLeft = Math.max(0, W * X0 - lab.offsetWidth / 2 - 4) + 'px';
+      var lr = R(lab);
+      var x0 = br.l + W * X0, y0 = isTop ? lr.b : lr.t, x1 = br.l + W * X1, y1 = spineY;
+      function boneX(y) { return x0 + (y - y0) * (x1 - x0) / (y1 - y0); }
+      function anchorY(row) { var a = R(row.querySelector('.hyp-title, .add-hyp')); return { a: a, y: a.t + Math.min(a.h / 2, 17) }; }
+
+      var rows = b.querySelectorAll('.rib-row');
+      rows.forEach(function (row) {
+        var y = anchorY(row).y;
+        row.style.marginLeft = Math.max(0, boneX(y) - GAP - row.offsetWidth - br.l - 4) + 'px';
+      });
+      out += '<line class="bone-line" x1="' + x0 + '" y1="' + y0 + '" x2="' + x1 + '" y2="' + y1 + '"/>';
+      rows.forEach(function (row) {
+        var m = anchorY(row), bx = boneX(m.y), rr = R(row);
+        out += '<line class="rib' + (row.classList.contains('add-row') ? ' add' : '') + '" x1="' + m.a.r + '" y1="' + m.y + '" x2="' + bx + '" y2="' + m.y + '"/>';
+        var t = row.querySelector('.hyp-toggle');
+        if (t) {
+          t.style.left = (m.a.r - rr.l + (bx - m.a.r) / 2 - 11) + 'px';
+          t.style.top = (m.y - rr.t - 11) + 'px';
+        }
+      });
+    });
+    svg.innerHTML = out;
+  }
+
+  var pending = false;
+  function relayout() { if (pending) return; pending = true; requestAnimationFrame(function () { pending = false; layout(); }); }
+
+  // ---- Events ----
+  fish.addEventListener('input', function (e) {
+    var el = e.target.closest('[data-fk]');
+    if (!el) return;
+    V[el.getAttribute('data-fk')] = el.value;
+    save(); grow(el); relayout();
+  });
+  fish.addEventListener('click', function (e) {
+    var row = e.target.closest('.hyp'), bone = e.target.closest('.bone');
+    var hk = row && row.getAttribute('data-k'), btn;
+    if ((btn = e.target.closest('[data-add-act]')) && hk) {
+      var na = actCount(hk) + 1;
+      V[hk + '_acount'] = String(na);
+      focusKey = actKey(hk, na);
+      save(); render(); return;
+    }
+    if ((btn = e.target.closest('[data-rm-act]')) && hk) {
+      var last = actCount(hk);
+      for (var j = 1, nr = resCount(hk, last); j <= nr; j++) delete V[resKey(hk, last, j)];
+      delete V[actKey(hk, last)]; delete V[hk + '_a' + last + '_rcount'];
+      V[hk + '_acount'] = String(last - 1);
+      save(); render(); return;
+    }
+    if ((btn = e.target.closest('[data-add-res]')) && hk) {
+      var ai = +btn.getAttribute('data-add-res'), nres = resCount(hk, ai) + 1;
+      V[hk + '_a' + ai + '_rcount'] = String(nres);
+      focusKey = resKey(hk, ai, nres);
+      save(); render(); return;
+    }
+    if ((btn = e.target.closest('[data-rm-res]')) && hk) {
+      var ri = +btn.getAttribute('data-rm-res'), lr = resCount(hk, ri);
+      delete V[resKey(hk, ri, lr)];
+      V[hk + '_a' + ri + '_rcount'] = String(lr - 1);
+      save(); render(); return;
+    }
+    if (e.target.closest('[data-toggle]') && row) {
+      var k = row.getAttribute('data-k');
+      open[k] = !open[k];
+      render();
+      var t = fish.querySelector('.hyp[data-k="' + k + '"] .hyp-toggle');
+      if (t) t.focus();
+    } else if (e.target.closest('[data-add]') && bone) {
+      var cat = bone.getAttribute('data-cat'), n = count(cat) + 1;
+      V[countKey(cat)] = String(n);
+      var nk = 'd4_fb_' + cat + '_h' + n;
+      open[nk] = true; focusKey = nk;
+      save(); render();
+    } else if (e.target.closest('[data-remove]') && row && bone) {
+      var rk = row.getAttribute('data-k'), c = bone.getAttribute('data-cat');
+      Object.keys(V).forEach(function (key) { if (key === rk || key.indexOf(rk + '_') === 0) delete V[key]; });
+      delete open[rk];
+      V[countKey(c)] = String(count(c) - 1);
+      save(); render();
+    }
+  });
+  function setAll(isOpen) {
+    CATS.forEach(function (c) {
+      for (var i = 1, n = count(c[0]); i <= n; i++) open['d4_fb_' + c[0] + '_h' + i] = isOpen;
+    });
+    render();
+  }
+  document.getElementById('fb-expand').addEventListener('click', function () { setAll(true); });
+  document.getElementById('fb-collapse').addEventListener('click', function () { setAll(false); });
+  window.addEventListener('resize', relayout);
+  window.addEventListener('load', relayout);
+  if (window.ResizeObserver) new ResizeObserver(relayout).observe(fish);
+
+  render();
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,137 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>E8D Portal – Prototype</title>
+<link rel="stylesheet" href="assets/portal.css">
+<style>
+  .home { max-width: 1100px; margin: 0 auto; padding: 28px 24px 48px; }
+  .hero { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 18px; }
+  .hero h1 { margin: 0; font-size: 28px; }
+  .hero p { margin: 6px 0 0; color: var(--muted); max-width: 640px; }
+  .hero .btns { display: flex; flex-wrap: wrap; gap: 12px; }
+  .btn.ghost { background: #fff; color: var(--hdr); border-color: var(--hdr); }
+  .home h2 { margin: 30px 0 12px; font-size: 18px; }
+  .flow { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 10px; }
+  .flow a {
+    display: block; height: 100%; padding: 12px 14px; border-radius: 8px; text-decoration: none; color: var(--ink);
+    background: #fff; border: 1px solid var(--panel-line);
+  }
+  .flow a:hover { border-color: var(--hdr); }
+  .flow b { display: flex; align-items: center; gap: 8px; color: var(--hdr); font-size: 15px; }
+  .flow .gate { font-size: 10.5px; font-weight: 700; text-transform: uppercase; color: #8a5a00; background: #fff1cf; padding: 1px 6px; border-radius: 999px; }
+  .flow .cur { font-size: 10.5px; font-weight: 700; text-transform: uppercase; color: #6b4a00; background: var(--current); padding: 1px 6px; border-radius: 999px; }
+  .flow small { display: block; margin-top: 4px; color: var(--muted); }
+  .two { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+  .home ul { margin: 0; padding-left: 18px; }
+  .home li { margin: 4px 0; }
+  table { width: 100%; border-collapse: collapse; background: #fff; font-size: 13px; }
+  th, td { text-align: left; vertical-align: top; padding: 8px 10px; border-bottom: 1px solid #e3e8ec; }
+  th { background: #f6f8f9; font-weight: 600; }
+  .tbl { overflow-x: auto; border: 1px solid var(--panel-line); border-radius: 8px; }
+  .swatch { display: inline-block; width: 11px; height: 11px; border-radius: 50%; vertical-align: -1px; margin-right: 4px; border: 2px solid #9aa6ae; }
+  .swatch.v { background: #fff; }
+  .swatch.c { background: var(--current); border-color: var(--current); }
+  .swatch.d { background: var(--done); border-color: var(--done); }
+  @media (max-width: 760px) { .two { grid-template-columns: minmax(0, 1fr); } .home { padding: 20px 16px 40px; } }
+</style>
+</head>
+<body>
+<header class="topbar">
+  <span class="brand"><span class="brand-id">E8D Portal</span><span class="brand-sub">Engineering 8D – clickable prototype</span></span>
+</header>
+<div class="concept-note">Concept mock-up created by <b>Dibakar Deb</b> to illustrate the requirements for our E8D portal – its layout, fields and workflow. It is a reference for discussion, not the final application.</div>
+
+<main class="home">
+  <section class="hero">
+    <div>
+      <h1>E8D Portal prototype</h1>
+      <p>A front-end walkthrough of every 8D discipline, for the Power Apps + SharePoint build. Type into any field: the values carry across pages so the flow can be demonstrated end to end. Nothing is saved anywhere except this browser.</p>
+    </div>
+    <div class="btns">
+      <a class="btn" id="open" href="d0.html" style="text-decoration:none;text-align:center">Open demo 8D</a>
+      <button type="button" class="btn ghost" id="reset">Start a fresh 8D</button>
+    </div>
+  </section>
+
+  <h2>Stages</h2>
+  <ol class="flow" id="flow"></ol>
+
+  <div class="two">
+    <section>
+      <h2>How to read the prototype</h2>
+      <ul>
+        <li><b>Header + Issue Detail panel</b> are the same on every stage; only <b>Stage Detail</b> changes.</li>
+        <li>Discipline dots: <span class="swatch v"></span>stage you are viewing, <span class="swatch c"></span>current stage of the 8D, <span class="swatch d"></span>completed. Any stage can be opened at any time.</li>
+        <li><b>Next Stage</b> on the current stage moves the 8D forward. On an earlier stage it only navigates.</li>
+        <li><b>Submit</b> on D3A / D5A / D7A simulates the 8D Manager approval. <b>Close 8D</b> on D8 closes the record.</li>
+        <li><b>D7 &amp; D7A</b> are only active when D5 › Systemic action needed? = Yes; otherwise they are greyed out and skipped.</li>
+        <li><b>8D Manager</b> (D1) is mandatory: Next Stage is blocked until it is filled.</li>
+        <li>Fields showing options separated by “/” are dropdowns; other grey text is a hint that disappears when typing.</li>
+        <li><b>Dev notes</b> (top-right on each stage) shows field types, SharePoint column names and logic for the developer.</li>
+      </ul>
+    </section>
+    <section>
+      <h2>Issue Detail panel</h2>
+      <ul>
+        <li><b>Status</b> (Open / Closed) and <b>Current Stage</b> (D#): system generated, read-only.</li>
+        <li>Shown on every stage: <b>8D Leader</b>, <b>Project Number</b>, <b>Project Name</b>, <b>Customer</b>, <b>Windchill Link</b>, <b>Attachments</b>, <b>Notes</b>.</li>
+        <li><b>Notes</b> work as an event log: each note is added with date/time, stage and author, and is locked once added – no edits or deletions.</li>
+        <li><b>Generate Report</b>: button placeholder only in this phase.</li>
+      </ul>
+    </section>
+  </div>
+
+  <h2>Suggested SharePoint lists</h2>
+  <div class="tbl">
+    <table>
+      <thead><tr><th>List</th><th>One row per</th><th>Key columns</th></tr></thead>
+      <tbody>
+        <tr><td><b>E8D_Register</b></td><td>8D</td><td>ID, Status (Open/Closed), CurrentStage (D0…D8), Leader, Manager (Person), ProjectNumber, ProjectName, Customer, WindchillLink, Notes, plus every single-value field from D0 (incl. Initiator), D2, D3, D4 RCA, D5, D6, D7, D8 (column names shown in Dev notes)</td></tr>
+        <tr><td><b>E8D_Team</b></td><td>person</td><td>8D ID (lookup), Person / Name, Role (Internal / External / Approver / Notifier)</td></tr>
+        <tr><td><b>E8D_Fishbone</b></td><td>hypothesis</td><td>8D ID, Category (Design + 6M), HypothesisNo, Hypothesis</td></tr>
+        <tr><td><b>E8D_FishboneActions</b></td><td>action / result</td><td>Hypothesis ID (lookup), ActionNo, Action, ResultNo, Result</td></tr>
+        <tr><td><b>E8D_CorrectiveActions</b></td><td>corrective action</td><td>8D ID, CA No, Corrective Action, Hypothesis, Risk, Problem Source (D5), Validation Steps (D6)</td></tr>
+        <tr><td><b>E8D_SystemicActions</b></td><td>systemic action</td><td>8D ID, SA No, Systemic Action, Category, Owner (Person), Document Number</td></tr>
+        <tr><td><b>E8D_FiveWhys</b></td><td>process chain</td><td>8D ID, Type (Occurrence / Detection), ProcessNo, Process, Why1 … Why5</td></tr>
+        <tr><td><b>E8D_Notes</b></td><td>note</td><td>8D ID, Note, Stage, Author, Created – create-only permissions so entries cannot be edited</td></tr>
+        <tr><td><b>E8D_Approvals</b></td><td>approval decision</td><td>8D ID, Gate (D3A / D5A / D7A), Approver, Decision, Comments, Date – driven by a Power Automate approval flow</td></tr>
+        <tr><td><b>E8D Documents</b> (library)</td><td>file</td><td>One folder per 8D ID for Attachments</td></tr>
+      </tbody>
+    </table>
+  </div>
+</main>
+
+<script src="assets/portal.js"></script>
+<script>
+(function () {
+  var s = E8D.state();
+  var cur = s.current, closed = s.status === 'Closed';
+  document.getElementById('flow').innerHTML = E8D.stages.map(function (st) {
+    var extra = st.subs ? '<small>' + st.subs.join(' · ') + '</small>' : '';
+    return '<li><a href="' + st.pages[0] + '"><b>' + st.id +
+      (st.approval ? ' <span class="gate">Approval</span>' : '') +
+      (!closed && st.id === cur ? ' <span class="cur">Current</span>' : '') +
+      (E8D.isSkipped(st.id) ? ' <span class="gate" style="background:#eceff1;color:#5f6b74">Not required</span>' : '') +
+      '</b>' + st.title + extra + '</a></li>';
+  }).join('');
+  document.getElementById('open').href = E8D.currentPage();
+  document.getElementById('open').textContent = 'Open demo 8D #' + s.id + (closed ? ' (closed)' : ' – at ' + cur);
+  // Two-step confirm on the page itself (browser confirm() dialogs are blocked when hosted)
+  var resetBtn = document.getElementById('reset'), armed = false, disarm;
+  resetBtn.addEventListener('click', function () {
+    if (!armed) {
+      armed = true;
+      resetBtn.textContent = 'Click again to clear all demo data';
+      disarm = setTimeout(function () { armed = false; resetBtn.textContent = 'Start a fresh 8D'; }, 4000);
+      return;
+    }
+    clearTimeout(disarm);
+    E8D.reset();
+    window.location.href = 'd0.html';
+  });
+})();
+</script>
+</body>
+</html>

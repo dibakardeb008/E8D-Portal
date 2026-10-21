@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>D0 · 8D Initiation – E8D Portal</title>
+<link rel="stylesheet" href="assets/portal.css">
+</head>
+<body data-stage="D0">
+<div id="stage-content">
+  <div class="dev-page">
+    <b>D0 – 8D Initiation.</b> Saving D0 creates the 8D record (system generates the ID, Status = Open, Current Stage = D0).
+  </div>
+  <div data-f="person" data-key="d0_initiator" data-label="8D Initiator" data-ph="Name" data-note="Can default to the logged-in user (User().FullName)."></div>
+  <div data-f="textarea" data-key="d0_initial_assessment" data-label="Initial 8D Assessment" data-ph="Describe observation of failure." data-rows="3"></div>
+  <div data-f="dropdown" data-key="d0_problem_location" data-label="Problem Location" data-options="Kochi|Dongguan|Nantong"></div>
+  <div data-f="dropdown" data-key="d0_detection" data-label="How was the problem detected?" data-options="Testing|Production Line|Customer"></div>
+  <div data-f="dropdown" data-key="d0_product_type" data-label="Product Type" data-options="Harness Connector|Busbar|Contact"></div>
+  <div data-f="dropdown" data-key="d0_failure_category" data-label="Failure Category" data-options="Mechanical|Electrical|Sealing|Crimping"></div>
+</div>
+<script src="assets/portal.js"></script>
+</body>
+</html>

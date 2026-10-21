@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>D7 · Systemic Action – E8D Portal</title>
+<link rel="stylesheet" href="assets/portal.css">
+</head>
+<body data-stage="D7">
+<div id="stage-content">
+  <div class="dev-page">
+    <b>D7 – Systemic Action.</b> Only active when D5 › Systemic action needed? = Yes. Next Stage leads to the D7A approval gate.
+    <ul>
+      <li>Starts with one systemic action; “+ Add systemic action” adds more, each with its own category, owner and document number.</li>
+      <li>Suggested child list <code>E8D_SystemicActions</code>: 8D ID, SA No, Systemic Action, Category, Owner (Person), Document Number.</li>
+    </ul>
+  </div>
+
+  <div data-list="d7_sa" data-min="1" data-add-label="Add systemic action" data-item="systemic action" data-item-class="card-item">
+    <template>
+      <p class="item-title">Systemic Action {n}</p>
+      <div data-f="textarea" data-autogrow data-key="d7_sa_{n}" data-label="Systemic Action" data-ph="Describe the systemic action to stop the issue happening in future"></div>
+      <div data-f="dropdown" data-key="d7_sa_{n}_category" data-label="Systemic category" data-options="DFMEA template update|Design guideline|Process update"></div>
+      <div class="g2">
+        <div data-f="person" data-key="d7_sa_{n}_owner" data-label="Systemic Action Owner" data-ph="Name"></div>
+        <div data-f="text" data-key="d7_sa_{n}_doc" data-label="Document Number" data-ph="Relevant document number to be updated"></div>
+      </div>
+    </template>
+  </div>
+</div>
+<script src="assets/portal.js"></script>
+</body>
+</html>

@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>D3A · ICA Submission Request – E8D Portal</title>
+<link rel="stylesheet" href="assets/portal.css">
+</head>
+<body data-stage="D3A">
+<div id="stage-content">
+  <div class="dev-page">
+    <b>D3A – ICA approval gate.</b> Submit sends an approval request to the 8D Manager (Power Automate “Start and wait for an approval”).
+    <ul>
+      <li>Approve → Current Stage moves to D4. Reject → stays at D3 with the approver's comments.</li>
+      <li>Log each decision in <code>E8D_Approvals</code> (8D ID, Gate, Approver, Decision, Comments, Date).</li>
+      <li>The read-only summary below is a suggestion so the approver sees what they are approving.</li>
+    </ul>
+  </div>
+  <div data-f="auto" data-src="manager" data-label="Current Stage Approver" data-note="Auto-filled with the 8D Manager from D1."></div>
+  <div class="g2">
+    <div data-f="auto" data-src="approvers" data-label="Additional approvers" data-note="Optional approvers from D1 – all must approve (suggestion)."></div>
+    <div data-f="auto" data-src="notifiers" data-label="Notified" data-note="Optional notifiers from D1 – informed only."></div>
+  </div>
+  <p class="group-label">Submitted for approval (from D3)</p>
+  <dl class="summary" data-summary="d3_launch_impact=Impact to Launch?;d3_impact_description=Impact Description;d3_ica=Interim Containment Action;d3_containment_verification=Containment Verification"></dl>
+</div>
+<script src="assets/portal.js"></script>
+</body>
+</html>

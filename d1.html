@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>D1 · Team Formation – E8D Portal</title>
+<link rel="stylesheet" href="assets/portal.css">
+</head>
+<body data-stage="D1">
+<div id="stage-content">
+  <div class="dev-page">
+    <b>D1 – Team.</b>
+    <ul>
+      <li>Row 1 – approvals: 8D Manager (mandatory, approver for D3A, D5A, D7A), additional approvers (optional, approve together with the 8D Manager) and notifiers (optional, informed only).</li>
+      <li>Row 2 – team: internal and external members, each starting with 2 rows; “+ Add” adds more, only the last added can be removed.</li>
+      <li>Suggested child list <code>E8D_Team</code>: 8D ID, Person / Name, Role (Internal / External / Approver / Notifier).</li>
+    </ul>
+  </div>
+
+  <div class="g3 row-block">
+    <div class="col-block">
+      <h2 class="section-h">8D Manager</h2>
+      <p class="section-sub">Mandatory · approves D3A, D5A, D7A</p>
+      <div data-f="person" data-key="d1_manager" data-label="Name" data-ph="Name" data-required data-req-label="8D Manager"></div>
+    </div>
+    <div class="col-block">
+      <h2 class="section-h">Additional approvers</h2>
+      <p class="section-sub">Optional · approve with the 8D Manager</p>
+      <div data-list="d1_approver" data-min="0" data-add-label="Add approver" data-item="approver">
+        <template><div data-f="person" data-key="d1_approver_{n}" data-label="Approver {n}" data-ph="Name"></div></template>
+      </div>
+    </div>
+    <div class="col-block">
+      <h2 class="section-h">Notifiers</h2>
+      <p class="section-sub">Optional · informed only</p>
+      <div data-list="d1_notifier" data-min="0" data-add-label="Add notifier" data-item="notifier">
+        <template><div data-f="person" data-key="d1_notifier_{n}" data-label="Notifier {n}" data-ph="Name"></div></template>
+      </div>
+    </div>
+  </div>
+
+  <div class="g2 row-block">
+    <div class="col-block">
+      <h2 class="section-h">Internal team</h2>
+      <div data-list="d1_internal" data-min="2" data-add-label="Add internal team member" data-item="internal team member">
+        <template><div data-f="person" data-key="d1_internal_{n}" data-label="Internal Team Member {n}" data-ph="Name"></div></template>
+      </div>
+    </div>
+    <div class="col-block">
+      <h2 class="section-h">External team</h2>
+      <div data-list="d1_external" data-min="2" data-add-label="Add external team member" data-item="external team member">
+        <template><div data-f="text" data-key="d1_external_{n}" data-label="External Team Member {n}" data-ph="Name" data-note="External people may not be in the directory – free text."></div></template>
+      </div>
+    </div>
+  </div>
+</div>
+<script src="assets/portal.js"></script>
+</body>
+</html>

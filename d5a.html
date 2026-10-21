@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>D5A · PCA Submission Request – E8D Portal</title>
+<link rel="stylesheet" href="assets/portal.css">
+</head>
+<body data-stage="D5A">
+<div id="stage-content">
+  <div class="dev-page">
+    <b>D5A – PCA approval gate.</b> Same mechanism as D3A: approval request to the 8D Manager (plus any additional approvers from D1). Approve → D6, Reject → back to D5.
+  </div>
+  <div data-f="auto" data-src="manager" data-label="Current Stage Approver" data-note="Auto-filled with the 8D Manager from D1."></div>
+  <div class="g2">
+    <div data-f="auto" data-src="approvers" data-label="Additional approvers" data-note="Optional approvers from D1 – all must approve (suggestion)."></div>
+    <div data-f="auto" data-src="notifiers" data-label="Notified" data-note="Optional notifiers from D1 – informed only."></div>
+  </div>
+  <p class="group-label">Submitted for approval (from D4 &amp; D5)</p>
+  <dl class="summary" data-summary="d4_root_cause=Root Cause;d5_happened_before=Did the failure happen in the past?;d5_systemic_needed=Systemic action needed?"></dl>
+  <p class="group-label" style="margin-top:16px">Corrective actions</p>
+  <dl class="summary" data-summary-repeat="d5_ca" data-summary="d5_ca_{n}=Corrective Action {n};d5_ca_{n}_hyp=Hypothesis;d5_ca_{n}_risk=Risk;d5_ca_{n}_source=Problem source"></dl>
+</div>
+<script src="assets/portal.js"></script>
+</body>
+</html>

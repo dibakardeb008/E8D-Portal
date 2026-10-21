@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>D6 · Validation of PCA – E8D Portal</title>
+<link rel="stylesheet" href="assets/portal.css">
+</head>
+<body data-stage="D6">
+<div id="stage-content">
+  <div class="dev-page">
+    <b>D6 – Validation of PCA.</b>
+    <ul>
+      <li>One card per corrective action from D5, pre-filled and read-only. To add or change a corrective action, go back to D5.</li>
+      <li>“Steps taken to validate” is stored against each corrective action (same row in <code>E8D_CorrectiveActions</code>).</li>
+    </ul>
+  </div>
+
+  <h2 class="section-h">Corrective Actions (verified)</h2>
+  <p class="section-sub">Pulled automatically from <a href="d5.html">D5</a>. Add or edit corrective actions there.</p>
+  <div data-list="d6_ca" data-count-from="d5_ca" data-item-class="card-item">
+    <template>
+      <p class="item-title">Corrective Action {n}</p>
+      <div data-f="auto" data-autogrow data-src="value:d5_ca_{n}" data-empty="Not filled in D5 yet" data-label="Corrective Action (from D5)"></div>
+      <div data-f="auto" data-src="value:d5_ca_{n}_source" data-empty="Not selected in D5 yet" data-label="Problem source (from D5)"></div>
+      <div data-f="textarea" data-autogrow data-key="d6_ca_{n}_validation" data-label="Steps taken to validate corrective action" data-ph="Describe the actions / tests used to validate corrective action {n}"></div>
+    </template>
+  </div>
+
+  <div data-f="dropdown" data-key="d6_resolved" data-label="Did corrective action resolve the failure?" data-options="Yes|No" data-note="Open question for the process owner: should “No” send the 8D back to D4? Could also be asked per corrective action."></div>
+</div>
+<script src="assets/portal.js"></script>
+</body>
+</html>
