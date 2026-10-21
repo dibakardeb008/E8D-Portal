@@ -68,6 +68,9 @@
         <li><b>Submit</b> on D3A / D5A / D7A simulates the 8D Manager approval. <b>Close 8D</b> on D8 closes the record.</li>
         <li><b>D7 &amp; D7A</b> are only active when D5 › Systemic action needed? = Yes; otherwise they are greyed out and skipped.</li>
         <li><b>8D Manager</b> (D1) is mandatory: Next Stage is blocked until it is filled.</li>
+        <li><b>Approvals</b>: D3A / D5A / D7A list the 8D Manager and every additional approver with a Pending / Approved status; all must approve. In the prototype, use “Approve (demo)” for each.</li>
+        <li><b>Timeline</b>: each D has a target (D1 2, D2 2, D3 4, D4 10, D5 2, D6 15, D7 10, D8 1 days) and every approval gate (D3A, D5A, D7A) has 2 days. Once passed, the stage shows as overdue and a reminder goes to the 8D Leader and 8D Manager. The 8D Manager can then set a new target date with a reason. Reminders and date changes are recorded in Notes. Use the demo clock under Dev notes to skip days.</li>
+        <li><b>Revisions</b>: if D6 shows the failure is not resolved, “Start new revision” archives D4–D6 (read-only), pre-fills a new revision and returns the 8D to D4.</li>
         <li>Fields showing options separated by “/” are dropdowns; other grey text is a hint that disappears when typing.</li>
         <li><b>Dev notes</b> (top-right on each stage) shows field types, SharePoint column names and logic for the developer.</li>
       </ul>
@@ -78,7 +81,7 @@
         <li><b>Status</b> (Open / Closed) and <b>Current Stage</b> (D#): system generated, read-only.</li>
         <li>Shown on every stage: <b>8D Leader</b>, <b>Project Number</b>, <b>Project Name</b>, <b>Customer</b>, <b>Windchill Link</b>, <b>Attachments</b>, <b>Notes</b>.</li>
         <li><b>Notes</b> work as an event log: each note is added with date/time, stage and author, and is locked once added – no edits or deletions.</li>
-        <li><b>Generate Report</b>: button placeholder only in this phase.</li>
+        <li><b>Generate Report</b>: button placeholder only. The real portal builds the PowerPoint 8D report from the fields in these pages; engineering detail (photos, FEA, tolerance stacks) is uploaded as Attachments and added as an appendix.</li>
       </ul>
     </section>
   </div>
@@ -96,7 +99,8 @@
         <tr><td><b>E8D_SystemicActions</b></td><td>systemic action</td><td>8D ID, SA No, Systemic Action, Category, Owner (Person), Document Number</td></tr>
         <tr><td><b>E8D_FiveWhys</b></td><td>process chain</td><td>8D ID, Type (Occurrence / Detection), ProcessNo, Process, Why1 … Why5</td></tr>
         <tr><td><b>E8D_Notes</b></td><td>note</td><td>8D ID, Note, Stage, Author, Created – create-only permissions so entries cannot be edited</td></tr>
-        <tr><td><b>E8D_Approvals</b></td><td>approval decision</td><td>8D ID, Gate (D3A / D5A / D7A), Approver, Decision, Comments, Date – driven by a Power Automate approval flow</td></tr>
+        <tr><td><b>E8D_Approvals</b></td><td>approval decision</td><td>8D ID, Gate (D3A / D5A / D7A), Revision, Approver, Decision, Comments, Date – driven by a Power Automate approval flow (everyone must approve)</td></tr>
+        <tr><td><b>E8D_StageLog</b></td><td>stage per revision</td><td>8D ID, Stage, Revision, Started, Due (start + target days, or the date set by the 8D Manager), Completed, ReminderSent, plus a change history (old date, new date, reason, by, when) – a scheduled flow e-mails Leader &amp; Manager when Due has passed</td></tr>
         <tr><td><b>E8D Documents</b> (library)</td><td>file</td><td>One folder per 8D ID for Attachments</td></tr>
       </tbody>
     </table>
@@ -109,7 +113,9 @@
   var s = E8D.state();
   var cur = s.current, closed = s.status === 'Closed';
   document.getElementById('flow').innerHTML = E8D.stages.map(function (st) {
-    var extra = st.subs ? '<small>' + st.subs.join(' · ') + '</small>' : '';
+    var td = E8D.targetDays[st.id];
+    var extra = (st.subs ? '<small>' + st.subs.join(' · ') + '</small>' : '') +
+      (td ? '<small>Target ' + td + (td === 1 ? ' day' : ' days') + '</small>' : st.approval ? '<small>Counts toward ' + st.id.replace('A', '') + '</small>' : '');
     return '<li><a href="' + st.pages[0] + '"><b>' + st.id +
       (st.approval ? ' <span class="gate">Approval</span>' : '') +
       (!closed && st.id === cur ? ' <span class="cur">Current</span>' : '') +

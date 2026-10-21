@@ -13,10 +13,12 @@
     <ul>
       <li>One card per corrective action from D5, pre-filled and read-only. To add or change a corrective action, go back to D5.</li>
       <li>“Steps taken to validate” is stored against each corrective action (same row in <code>E8D_CorrectiveActions</code>).</li>
+      <li>D5 verifies by analysis (FEA, tolerance stacks); D6 validates by test.</li>
+      <li>If the failure is not resolved (“No”), anyone can start a new revision: D4–D6 of the current revision are archived read-only, the new revision is pre-filled from it and the 8D returns to D4. D0–D3 are not touched. Store a Revision number on every D4–D6 record.</li>
     </ul>
   </div>
 
-  <h2 class="section-h">Corrective Actions (verified)</h2>
+  <h2 class="section-h">Corrective Actions</h2>
   <p class="section-sub">Pulled automatically from <a href="d5.html">D5</a>. Add or edit corrective actions there.</p>
   <div data-list="d6_ca" data-count-from="d5_ca" data-item-class="card-item">
     <template>
@@ -27,7 +29,8 @@
     </template>
   </div>
 
-  <div data-f="dropdown" data-key="d6_resolved" data-label="Did corrective action resolve the failure?" data-options="Yes|No" data-note="Open question for the process owner: should “No” send the 8D back to D4? Could also be asked per corrective action."></div>
+  <div data-f="dropdown" data-key="d6_resolved" data-label="Did corrective action resolve the failure?" data-options="Yes|No" data-note="No → “Start new revision” appears below and takes the 8D back to D4."></div>
+  <div data-revision-start></div>
 </div>
 <script src="assets/portal.js"></script>
 </body>

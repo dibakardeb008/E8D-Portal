@@ -134,7 +134,8 @@
   'use strict';
   var STORE_KEY = 'e8d-prototype-v1';
   var S = E8D.state(), V = S.values;           // shared live state object from portal.js
-  function save() { try { localStorage.setItem(STORE_KEY, JSON.stringify(S)); } catch (e) { /* ignore */ } }
+  var RO = E8D.readOnly();                      // viewing an archived revision: show only
+  function save() { if (RO) return; try { localStorage.setItem(STORE_KEY, JSON.stringify(S)); } catch (e) { /* ignore */ } }
 
   var CATS = [
     ['design', 'Design', 'top'], ['man', 'Man', 'top'], ['machine', 'Machine', 'top'], ['material', 'Material', 'top'],
@@ -219,6 +220,11 @@
     var head = document.getElementById('head-text'), ps = (V.d2_problem_statement || '').trim();
     head.textContent = ps || 'Problem statement from D2 appears here';
     head.classList.toggle('empty', !ps);
+    if (RO) {
+      fish.querySelectorAll('textarea').forEach(function (t) { t.readOnly = true; });
+      fish.querySelectorAll('.add-row').forEach(function (r) { r.remove(); });     // no "+ Add hypothesis" ribs
+      fish.querySelectorAll('[data-remove], [data-add-act], [data-rm-act], [data-add-res], [data-rm-res]').forEach(function (b) { b.hidden = true; });
+    }
     fish.querySelectorAll('textarea').forEach(grow);
     layout();
     if (focusKey) {

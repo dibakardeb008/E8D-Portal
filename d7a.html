@@ -9,13 +9,10 @@
 <body data-stage="D7A">
 <div id="stage-content">
   <div class="dev-page">
-    <b>D7A – Systemic Action approval gate.</b> Only active when D5 › Systemic action needed? = Yes. Same mechanism as D3A: approval request to the 8D Manager (plus any additional approvers). Approve → D8, Reject → back to D7.
+    <b>D7A – Systemic Action approval gate.</b> Only active when D5 › Systemic action needed? = Yes. Same mechanism as D3A: the 8D Manager and every additional approver must approve. All approved → D8, Reject → back to D7.
   </div>
-  <div data-f="auto" data-src="manager" data-label="Current Stage Approver" data-note="Auto-filled with the 8D Manager from D1."></div>
-  <div class="g2">
-    <div data-f="auto" data-src="approvers" data-label="Additional approvers" data-note="Optional approvers from D1 – all must approve (suggestion)."></div>
-    <div data-f="auto" data-src="notifiers" data-label="Notified" data-note="Optional notifiers from D1 – informed only."></div>
-  </div>
+  <div data-approvals></div>
+  <div data-f="auto" data-src="notifiers" data-label="Notified" data-note="Optional notifiers from D1 – informed only."></div>
   <p class="group-label">Submitted for approval (from D7)</p>
   <dl class="summary" data-summary-repeat="d7_sa" data-summary="d7_sa_{n}=Systemic Action {n};d7_sa_{n}_category=Systemic category;d7_sa_{n}_owner=Systemic Action Owner;d7_sa_{n}_doc=Document Number"></dl>
 </div>

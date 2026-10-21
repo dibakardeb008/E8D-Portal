@@ -9,18 +9,15 @@
 <body data-stage="D3A">
 <div id="stage-content">
   <div class="dev-page">
-    <b>D3A – ICA approval gate.</b> Submit sends an approval request to the 8D Manager (Power Automate “Start and wait for an approval”).
+    <b>D3A – ICA approval gate.</b> “Submit for approval” sends a request to the 8D Manager and every additional approver from D1 (Power Automate approval, “Everyone must approve”).
     <ul>
-      <li>Approve → Current Stage moves to D4. Reject → stays at D3 with the approver's comments.</li>
-      <li>Log each decision in <code>E8D_Approvals</code> (8D ID, Gate, Approver, Decision, Comments, Date).</li>
-      <li>The read-only summary below is a suggestion so the approver sees what they are approving.</li>
+      <li>All approved → Current Stage moves to D4. Reject → back to D3 with the approver's comments.</li>
+      <li>Log each decision in <code>E8D_Approvals</code> (8D ID, Gate, Revision, Approver, Decision, Comments, Date).</li>
+      <li>The read-only summary below shows the approvers what they are approving.</li>
     </ul>
   </div>
-  <div data-f="auto" data-src="manager" data-label="Current Stage Approver" data-note="Auto-filled with the 8D Manager from D1."></div>
-  <div class="g2">
-    <div data-f="auto" data-src="approvers" data-label="Additional approvers" data-note="Optional approvers from D1 – all must approve (suggestion)."></div>
-    <div data-f="auto" data-src="notifiers" data-label="Notified" data-note="Optional notifiers from D1 – informed only."></div>
-  </div>
+  <div data-approvals></div>
+  <div data-f="auto" data-src="notifiers" data-label="Notified" data-note="Optional notifiers from D1 – informed only."></div>
   <p class="group-label">Submitted for approval (from D3)</p>
   <dl class="summary" data-summary="d3_launch_impact=Impact to Launch?;d3_impact_description=Impact Description;d3_ica=Interim Containment Action;d3_containment_verification=Containment Verification"></dl>
 </div>

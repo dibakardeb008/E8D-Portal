@@ -9,13 +9,11 @@
 <body data-stage="D5A">
 <div id="stage-content">
   <div class="dev-page">
-    <b>D5A – PCA approval gate.</b> Same mechanism as D3A: approval request to the 8D Manager (plus any additional approvers from D1). Approve → D6, Reject → back to D5.
+    <b>D5A – PCA approval gate.</b> Same mechanism as D3A: the 8D Manager and every additional approver must approve. All approved → D6, Reject → back to D5.
+    A new revision (from D6) resets this approval; the earlier revision's approvals stay in its archive.
   </div>
-  <div data-f="auto" data-src="manager" data-label="Current Stage Approver" data-note="Auto-filled with the 8D Manager from D1."></div>
-  <div class="g2">
-    <div data-f="auto" data-src="approvers" data-label="Additional approvers" data-note="Optional approvers from D1 – all must approve (suggestion)."></div>
-    <div data-f="auto" data-src="notifiers" data-label="Notified" data-note="Optional notifiers from D1 – informed only."></div>
-  </div>
+  <div data-approvals></div>
+  <div data-f="auto" data-src="notifiers" data-label="Notified" data-note="Optional notifiers from D1 – informed only."></div>
   <p class="group-label">Submitted for approval (from D4 &amp; D5)</p>
   <dl class="summary" data-summary="d4_root_cause=Root Cause;d5_happened_before=Did the failure happen in the past?;d5_systemic_needed=Systemic action needed?"></dl>
   <p class="group-label" style="margin-top:16px">Corrective actions</p>
