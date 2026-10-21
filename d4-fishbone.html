@@ -22,6 +22,32 @@
   .fish-lines .bone-line { stroke: var(--hdr); stroke-width: 3; stroke-linecap: round; }
   .fish-lines .rib { stroke: #7d97a5; stroke-width: 1.5; }
   .fish-lines .rib.add { stroke-dasharray: 4 4; }
+  .fish-lines .rib.red { stroke: #d64541; stroke-width: 2.5; }
+  .fish-lines .rib.green { stroke: #2e9e5e; stroke-width: 2.5; }
+
+  /* "Action needed?" per result and the red / green hypothesis chain */
+  .need { display: flex; align-items: center; flex-wrap: wrap; gap: 4px 6px; margin-top: 5px; font-size: 12px; color: var(--muted); }
+  .need span { margin-right: 2px; }
+  .need button {
+    padding: 2px 10px; cursor: pointer; font: inherit; font-size: 12px; font-weight: 600;
+    color: var(--muted); background: #fff; border: 1px solid var(--line); border-radius: 999px;
+  }
+  .need button:focus-visible { outline: 3px solid rgba(21,94,126,.3); outline-offset: 2px; }
+  .need .need-yes[aria-pressed="true"] { color: #fff; background: #d64541; border-color: #d64541; }
+  .need .need-no[aria-pressed="true"] { color: #fff; background: #2e9e5e; border-color: #2e9e5e; }
+  .det.next { border-color: #d64541; background: #fff; }
+  .hyp--red .hyp-title { border-color: #d64541; background: #fdecea; box-shadow: inset 4px 0 0 #d64541; }
+  .hyp--red .hyp-detail { border-color: #f2b8b3; background: #fff7f6; }
+  .hyp--red .results { border-left-color: #f2b8b3; }
+  .hyp--red .hyp-toggle { border-color: #d64541; color: #d64541; }
+  .hyp--red.open .hyp-toggle { background: #d64541; color: #fff; }
+  .hyp--green .hyp-title { border-color: #2e9e5e; background: #e8f8ef; box-shadow: inset 4px 0 0 #2e9e5e; }
+  .hyp--green .hyp-detail { border-color: #a8e2c2; background: #f4fbf7; }
+  .hyp--green .results { border-left-color: #a8e2c2; }
+  .hyp--green .hyp-toggle { border-color: #2e9e5e; color: #2e9e5e; }
+  .hyp--green.open .hyp-toggle { background: #2e9e5e; color: #fff; }
+  .cs-red { color: #c0392b; }
+  .cs-green { color: #1d7a4c; }
 
   .half { position: relative; z-index: 1; display: grid; grid-auto-flow: column; grid-auto-columns: minmax(0, 1fr); min-height: 170px; }
   .bone { display: flex; flex-direction: column; gap: 10px; padding: 0 4px; }
@@ -108,6 +134,7 @@
       <li>Seven bones: Design, Man, Machine, Material (top) / Method, Measurement, Mother Nature (bottom). Design is added to the classic 6M because these are engineering-development failures; it lines up with D5 “Problem source = Design” and the DFMEA questions in D2 / D4. Each bone starts with Hypothesis 1 and grows as hypotheses are added.</li>
       <li>Each hypothesis has a rib with a +/− button that opens or collapses its actions card. On a new 8D each bone shows Hypothesis 1 with its card open; added hypotheses open automatically; all others start collapsed and show “x actions · y results filled”.</li>
       <li>“Expand all” / “Collapse all” open or close every actions card at once.</li>
+      <li>Every result has “Next step needed?” Yes / No. Yes opens a box for the next step and turns the whole hypothesis chain red (box, card and rib); the chain turns green once every result is answered No. Clicking the chosen answer again clears it. Columns per result: NextStepNeeded (Yes/No), NextStep.</li>
       <li>Card starts with Action 1 + Result 1. “+ Add action” adds a new action with one result; “+ Add result” adds more results under that action. Only the last action / result can be removed.</li>
       <li>Data model: hypothesis → actions → results, e.g. child lists <code>E8D_FishboneAction</code> (hypothesis ID, Action No, Action) and <code>E8D_FishboneResult</code> (action ID, Result No, Result), or one table with Action No + Result No.</li>
       <li>Fish head shows the D2 Problem Statement (read-only).</li>
@@ -175,11 +202,38 @@
   }
   function plural(n, w) { return n + ' ' + w + (n === 1 ? '' : 's'); }
 
+  // "Next step needed?" per result: {result}_need = Yes / No, {result}_next = the next step (only when Yes).
+  // Chain colour: red if any result needs a next step, green once every result is answered No.
+  function chainStatus(k) {
+    var total = 0, no = 0;
+    for (var i = 1, na = actCount(k); i <= na; i++) {
+      for (var j = 1, nr = resCount(k, i); j <= nr; j++) {
+        var need = V[resKey(k, i, j) + '_need'];
+        total++;
+        if (need === 'Yes') return 'red';
+        if (need === 'No') no++;
+      }
+    }
+    return total && no === total ? 'green' : '';
+  }
+  function needHTML(rk, label) {
+    var need = V[rk + '_need'] || '';
+    return '<div class="need" role="group" aria-label="Next step needed? (' + esc(label) + ')"><span>Next step needed?</span>' +
+      ['Yes', 'No'].map(function (opt) {
+        return '<button type="button" class="need-' + opt.toLowerCase() + '" data-need="' + opt + '" data-rk="' + rk + '" aria-pressed="' + (need === opt) + '">' + opt + '</button>';
+      }).join('') + '</div>' +
+      (need === 'Yes' ? ta(rk + '_next', 'Describe the next step', 'det next', 'Next step for ' + label) : '');
+  }
+  function deleteResult(rk) { delete V[rk]; delete V[rk + '_need']; delete V[rk + '_next']; }
+
   function detailHTML(k) {
     var na = actCount(k), html = '';
     for (var i = 1; i <= na; i++) {
       var nr = resCount(k, i), res = '';
-      for (var j = 1; j <= nr; j++) res += ta(resKey(k, i, j), 'Result ' + j, 'det', 'Action ' + i + ', result ' + j);
+      for (var j = 1; j <= nr; j++) {
+        var rk = resKey(k, i, j), lbl = 'Action ' + i + ', result ' + j;
+        res += ta(rk, 'Result ' + j, 'det', lbl) + needHTML(rk, lbl);
+      }
       res += '<div class="mini-actions"><button type="button" data-add-res="' + i + '">+ Add result</button>' +
         (nr > 1 ? '<button type="button" class="rm" data-rm-res="' + i + '">Remove result ' + nr + '</button>' : '') + '</div>';
       html += '<div class="act">' + ta(actKey(k, i), 'Action ' + i, 'det act-title') + '<div class="results">' + res + '</div></div>';
@@ -196,15 +250,16 @@
       // newly added hypotheses open via the Add button; everything else starts collapsed.
       var t = tally(k);
       if (!(k in open)) open[k] = n === 1 && t.a + t.r === 0;
-      var isOpen = open[k];
-      rows += '<div class="rib-row hyp' + (isOpen ? ' open' : '') + '" data-k="' + k + '">' +
+      var isOpen = open[k], cs = chainStatus(k);
+      rows += '<div class="rib-row hyp' + (isOpen ? ' open' : '') + (cs ? ' hyp--' + cs : '') + '" data-k="' + k + '">' +
         ta(k, 'Hypothesis ' + i, 'hyp-title') +
         '<button type="button" class="hyp-toggle" data-toggle aria-expanded="' + isOpen + '" ' +
           'aria-label="' + (isOpen ? 'Collapse' : 'Expand') + ' actions and results for hypothesis ' + i + '">' + (isOpen ? '−' : '+') + '</button>' +
         (isOpen
           ? '<div class="hyp-detail">' + detailHTML(k) +
               (i === n && n > 1 ? '<button type="button" class="hyp-remove" data-remove>Remove hypothesis ' + i + '</button>' : '') + '</div>'
-          : '<button type="button" class="hyp-sum" data-toggle>' + plural(t.a, 'action') + ' · ' + plural(t.r, 'result') + ' filled</button>') +
+          : '<button type="button" class="hyp-sum" data-toggle>' + plural(t.a, 'action') + ' · ' + plural(t.r, 'result') + ' filled' +
+            (cs === 'red' ? ' · <b class="cs-red">next step needed</b>' : cs === 'green' ? ' · <b class="cs-green">no next step needed</b>' : '') + '</button>') +
       '</div>';
     }
     return '<div class="bone" data-cat="' + c[0] + '">' +
@@ -224,6 +279,7 @@
       fish.querySelectorAll('textarea').forEach(function (t) { t.readOnly = true; });
       fish.querySelectorAll('.add-row').forEach(function (r) { r.remove(); });     // no "+ Add hypothesis" ribs
       fish.querySelectorAll('[data-remove], [data-add-act], [data-rm-act], [data-add-res], [data-rm-res]').forEach(function (b) { b.hidden = true; });
+      fish.querySelectorAll('[data-need]').forEach(function (b) { b.disabled = true; });
     }
     fish.querySelectorAll('textarea').forEach(grow);
     layout();
@@ -274,7 +330,8 @@
       out += '<line class="bone-line" x1="' + x0 + '" y1="' + y0 + '" x2="' + x1 + '" y2="' + y1 + '"/>';
       rows.forEach(function (row) {
         var m = anchorY(row), bx = boneX(m.y), rr = R(row);
-        out += '<line class="rib' + (row.classList.contains('add-row') ? ' add' : '') + '" x1="' + m.a.r + '" y1="' + m.y + '" x2="' + bx + '" y2="' + m.y + '"/>';
+        var rc = row.classList.contains('add-row') ? ' add' : row.classList.contains('hyp--red') ? ' red' : row.classList.contains('hyp--green') ? ' green' : '';
+        out += '<line class="rib' + rc + '" x1="' + m.a.r + '" y1="' + m.y + '" x2="' + bx + '" y2="' + m.y + '"/>';
         var t = row.querySelector('.hyp-toggle');
         if (t) {
           t.style.left = (m.a.r - rr.l + (bx - m.a.r) / 2 - 11) + 'px';
@@ -298,6 +355,13 @@
   fish.addEventListener('click', function (e) {
     var row = e.target.closest('.hyp'), bone = e.target.closest('.bone');
     var hk = row && row.getAttribute('data-k'), btn;
+    if ((btn = e.target.closest('[data-need]')) && hk) {
+      var rkey = btn.getAttribute('data-rk'), val = btn.getAttribute('data-need');
+      V[rkey + '_need'] = V[rkey + '_need'] === val ? '' : val;     // click the chosen answer again to clear it
+      if (V[rkey + '_need'] !== 'Yes') delete V[rkey + '_next'];
+      else focusKey = rkey + '_next';
+      save(); render(); return;
+    }
     if ((btn = e.target.closest('[data-add-act]')) && hk) {
       var na = actCount(hk) + 1;
       V[hk + '_acount'] = String(na);
@@ -306,7 +370,7 @@
     }
     if ((btn = e.target.closest('[data-rm-act]')) && hk) {
       var last = actCount(hk);
-      for (var j = 1, nr = resCount(hk, last); j <= nr; j++) delete V[resKey(hk, last, j)];
+      for (var j = 1, nr = resCount(hk, last); j <= nr; j++) deleteResult(resKey(hk, last, j));
       delete V[actKey(hk, last)]; delete V[hk + '_a' + last + '_rcount'];
       V[hk + '_acount'] = String(last - 1);
       save(); render(); return;
@@ -319,7 +383,7 @@
     }
     if ((btn = e.target.closest('[data-rm-res]')) && hk) {
       var ri = +btn.getAttribute('data-rm-res'), lr = resCount(hk, ri);
-      delete V[resKey(hk, ri, lr)];
+      deleteResult(resKey(hk, ri, lr));
       V[hk + '_a' + ri + '_rcount'] = String(lr - 1);
       save(); render(); return;
     }
