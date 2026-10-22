@@ -742,8 +742,9 @@
   }
 
   var CONCEPT_NOTE =
-    '<div class="concept-note">Concept mock-up created by <b>Dibakar Deb</b> to illustrate the requirements for our E8D portal – ' +
-    'its layout, fields and workflow. It is a reference for discussion, not the final application.</div>';
+    '<div class="concept-note">This is a concept mock-up created to illustrate the requirements for the Engineering 8D portal – ' +
+    'its layout, fields and workflow. It is a reference for discussion, not the final application. ' +
+    'For any questions, please contact <b>Dibakar Deb</b>.</div>';
 
   function issueHTML() {
     return '<aside class="issue panel" aria-label="Issue Detail">' +
